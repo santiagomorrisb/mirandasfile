@@ -299,8 +299,8 @@ document.addEventListener('DOMContentLoaded', () => {
             status.classList.add('text-gray-500');
 
             // DATOS DE EMAILJS (¡REEMPLAZA ESTO!)
-            const serviceID = 'TU_SERVICE_ID';  // Ej: 'service_x8s9...'
-            const templateID = 'TU_TEMPLATE_ID'; // Ej: 'template_9a2...'
+            const serviceID = 'service_sg91wkp';  // Ej: 'service_x8s9...'
+            const templateID = 'template_tb4rbzq'; // Ej: 'template_9a2...'
 
             emailjs.sendForm(serviceID, templateID, this)
                 .then(() => {
