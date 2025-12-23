@@ -9,7 +9,7 @@ tailwind.config = {
                 serif: ['Playfair Display', 'serif'],
             },
             colors: {
-                'brand-bg': '#ffffff', // Fondo más limpio
+                'brand-bg': '#ffffff', 
                 'brand-dark': '#1a1a1a',
                 'brand-gray': '#888888',
             },
@@ -17,14 +17,10 @@ tailwind.config = {
                 fadeInUp: {
                     '0%': { opacity: '0', transform: 'translateY(20px)' },
                     '100%': { opacity: '1', transform: 'translateY(0)' },
-                },
-                shimmer: {
-                    '100%': { transform: 'translateX(100%)' }
                 }
             },
             animation: {
                 'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
-                'spin-slow': 'spin 3s linear infinite',
             }
         }
     }
@@ -32,18 +28,20 @@ tailwind.config = {
 
 // 2. Variables Globales
 let allPostsData = [];
+// Variables para el Carrusel
+let currentGalleryImages = [];
+let currentImageIndex = 0;
+let currentCollectionTitle = ''; // NUEVO: Para guardar el nombre de la colección actual
 
 document.addEventListener('DOMContentLoaded', () => {
     initPortfolio();
     initMobileMenu();
+    setupKeyboardListeners();
 });
 
 // 3. Carga Inicial
 async function initPortfolio() {
-    const grid = document.getElementById('portfolio-grid');
     const loader = document.getElementById('loading');
-    
-    // API de Miranda
     const SITE_DOMAIN = 'mirandapineiro05.wordpress.com';
     const API_URL = `https://public-api.wordpress.com/wp/v2/sites/${SITE_DOMAIN}/posts?_embed&per_page=100`;
 
@@ -59,46 +57,38 @@ async function initPortfolio() {
         });
 
         if(loader) loader.style.display = 'none';
-        
-        // Carga inicial
         renderPortfolio('all');
 
     } catch (error) {
         console.error("Error crítico:", error);
         if(loader) loader.style.display = 'none';
-        grid.innerHTML = `<div class="col-span-full text-center py-20">
-            <p class="text-red-500 mb-4">No se pudo conectar con el archivo.</p>
-            <button onclick="location.reload()" class="underline text-sm">Intentar de nuevo</button>
-        </div>`;
     }
 }
 
-// 4. Renderizador Mágico Mejorado
-// 4. Renderizador Mágico (Actualizado con Lógica de "Zara")
+// 4. Renderizador Principal
 window.renderPortfolio = (filter) => {
     const grid = document.getElementById('portfolio-grid');
-    
-    updateMenuState(filter); // Mantenemos la función del menú activo
-
+    updateMenuState(filter); 
     grid.innerHTML = ''; 
 
     let itemsToShow = [];
 
     if (filter === 'all') {
-        // MODO PORTADA:
-        // Intentamos sacar imagen destacada O la primera imagen del contenido
+        currentCollectionTitle = 'All Work'; // NUEVO
         itemsToShow = allPostsData.map(post => {
-            const coverImage = getSmartCoverImage(post); // Usamos la nueva función inteligente
+            const coverImage = getSmartCoverImage(post);
             return {
                 type: 'cover',
                 title: post.title.rendered,
                 image: coverImage,
                 link: post.link,
-                hasImage: coverImage !== null // Bandera para saber si tenemos foto
+                hasImage: coverImage !== null
             };
         });
     } else {
-        // MODO GALERÍA (Igual que antes)
+        // NUEVO: Guardamos el título de la colección actual (ej: "Gastronomy")
+        currentCollectionTitle = filter; 
+
         const targetPost = allPostsData.find(p => 
             p.title.rendered.toLowerCase().includes(filter.toLowerCase())
         );
@@ -109,10 +99,13 @@ window.renderPortfolio = (filter) => {
                 type: 'photo',
                 title: filter,
                 image: imgSrc,
-                link: targetPost.link,
                 hasImage: true
             }));
         }
+    }
+
+    if (filter !== 'all') {
+        currentGalleryImages = itemsToShow.map(item => item.image);
     }
 
     if (itemsToShow.length === 0) {
@@ -120,24 +113,17 @@ window.renderPortfolio = (filter) => {
         return;
     }
 
-    // Renderizado de Tarjetas (Estilo Zara: Imagen grande, texto mínimo)
+    // Renderizar Tarjetas
     itemsToShow.forEach((item, index) => {
-        
-        // Si no hay imagen en "All Work", saltamos este elemento para no romper la estética
-        // Opcional: podrías mostrar una tarjeta solo texto, pero en Zara si no hay foto, no suele haber item.
         if (item.type === 'cover' && !item.hasImage) return;
 
         const card = document.createElement('article');
         card.className = `group cursor-pointer opacity-0 animate-fade-in-up flex flex-col gap-3`;
         card.style.animationDelay = `${index * 100}ms`;
 
-        // HTML INTERNO
-        // Eliminé bordes y sombras para hacerlo más plano (flat) y limpio
         card.innerHTML = `
             <div class="relative w-full aspect-[3/4] overflow-hidden bg-gray-100">
-                
                 <div class="absolute inset-0 bg-gray-200 animate-pulse z-10"></div>
-
                 <img 
                     src="${item.image}" 
                     alt="${item.title}" 
@@ -145,7 +131,6 @@ window.renderPortfolio = (filter) => {
                     onload="this.classList.remove('opacity-0'); this.previousElementSibling.style.display='none';"
                     onerror="this.style.display='none';"
                 >
-                
                 <div class="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 pointer-events-none"></div>
             </div>
             
@@ -164,7 +149,7 @@ window.renderPortfolio = (filter) => {
                 window.renderPortfolio(item.title); 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
-                window.open(item.image, '_blank');
+                openCarousel(index);
             }
         });
 
@@ -172,57 +157,94 @@ window.renderPortfolio = (filter) => {
     });
 };
 
-// --- NUEVA FUNCIÓN DE IMAGEN INTELIGENTE ---
-function getSmartCoverImage(post) {
-    // 1. Intentar sacar la imagen destacada oficial de WP
-    if (post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0]) {
-        return post._embedded['wp:featuredmedia'][0].source_url;
-    }
-    
-    // 2. FALLBACK: Si no hay destacada, buscar la primera imagen dentro del contenido del post
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = post.content.rendered;
-    const firstImage = tempDiv.querySelector('img');
-    
-    if (firstImage) {
-        return firstImage.src;
-    }
+// ==========================================
+// 5. LÓGICA DEL CARRUSEL (LIGHTBOX)
+// ==========================================
 
-    // 3. Si no hay NADA, devolvemos null (para filtrar el item y que no salga roto)
-    return null;
+window.openCarousel = (index) => {
+    const lightbox = document.getElementById('lightbox');
+    currentImageIndex = index;
+    
+    lightbox.classList.remove('hidden');
+    setTimeout(() => lightbox.classList.remove('opacity-0'), 10);
+    document.body.style.overflow = 'hidden';
+
+    updateCarouselImage();
+};
+
+window.closeCarousel = () => {
+    const lightbox = document.getElementById('lightbox');
+    lightbox.classList.add('opacity-0');
+    setTimeout(() => {
+        lightbox.classList.add('hidden');
+        document.body.style.overflow = '';
+    }, 300);
+};
+
+window.nextImage = (e) => {
+    if(e) e.stopPropagation();
+    if (currentImageIndex < currentGalleryImages.length - 1) {
+        currentImageIndex++;
+    } else {
+        currentImageIndex = 0;
+    }
+    updateCarouselImage();
+};
+
+window.prevImage = (e) => {
+    if(e) e.stopPropagation();
+    if (currentImageIndex > 0) {
+        currentImageIndex--;
+    } else {
+        currentImageIndex = currentGalleryImages.length - 1;
+    }
+    updateCarouselImage();
+};
+
+function updateCarouselImage() {
+    const img = document.getElementById('lightbox-img');
+    const counter = document.getElementById('lightbox-counter');
+    const caption = document.getElementById('lightbox-caption'); // NUEVO: Referencia al caption
+    
+    // Efecto de fade out / escala antes de cambiar
+    img.classList.add('opacity-0', 'scale-[0.98]');
+
+    setTimeout(() => {
+        img.src = currentGalleryImages[currentImageIndex];
+        
+        // Formatear contador
+        const current = String(currentImageIndex + 1).padStart(2, '0');
+        const total = String(currentGalleryImages.length).padStart(2, '0');
+        counter.innerText = `${current} / ${total}`;
+
+        // NUEVO: Actualizar el texto de la "marca de agua"
+        // Usamos el título guardado y le damos formato
+        caption.innerText = `Miranda's Archive — ${currentCollectionTitle} Collection`;
+
+    }, 200);
 }
 
-// 5. NUEVO: Función para actualizar botones del menú
-function updateMenuState(activeFilter) {
-    const buttons = document.querySelectorAll('.filter-btn');
-    
-    buttons.forEach(btn => {
-        // Obtenemos la categoría guardada en el data-category del HTML
-        const btnCategory = btn.getAttribute('data-category');
-        
-        // Comprobamos si coincide (ignorando mayúsculas/minúsculas)
-        // O si el filtro activo contiene la categoría (ej: "Gastronomy Project" activa "Gastronomy")
-        const isActive = btnCategory.toLowerCase() === activeFilter.toLowerCase() || 
-                         activeFilter.toLowerCase().includes(btnCategory.toLowerCase()) && btnCategory !== 'all';
-
-        if (isActive) {
-            // Estilo ACTIVO (Negro, borde)
-            btn.className = "filter-btn text-xs md:text-sm uppercase tracking-[0.15em] border-b border-black text-black pb-1 transition-all duration-300";
-        } else {
-            // Estilo INACTIVO (Gris, sin borde)
-            btn.className = "filter-btn text-xs md:text-sm uppercase tracking-[0.15em] text-gray-400 hover:text-black hover:border-black border-b border-transparent transition-all pb-1";
-        }
+function setupKeyboardListeners() {
+    document.addEventListener('keydown', (e) => {
+        const lightbox = document.getElementById('lightbox');
+        if (lightbox.classList.contains('hidden')) return;
+        if (e.key === 'Escape') closeCarousel();
+        if (e.key === 'ArrowRight') nextImage();
+        if (e.key === 'ArrowLeft') prevImage();
     });
 }
 
+
 // --- UTILIDADES ---
 
-function getFeaturedImage(post) {
+function getSmartCoverImage(post) {
     if (post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0]) {
         return post._embedded['wp:featuredmedia'][0].source_url;
     }
-    // Si no hay imagen, devolvemos una cadena vacía para que salte el onerror o un placeholder elegante
-    return ''; 
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = post.content.rendered;
+    const firstImage = tempDiv.querySelector('img');
+    return firstImage ? firstImage.src : null;
 }
 
 function extractGalleryImages(htmlContent) {
@@ -232,6 +254,21 @@ function extractGalleryImages(htmlContent) {
     return Array.from(imgs)
         .map(img => img.src)
         .filter(src => src && !src.includes('s.w.org'));
+}
+
+function updateMenuState(activeFilter) {
+    const buttons = document.querySelectorAll('.filter-btn');
+    buttons.forEach(btn => {
+        const btnCategory = btn.getAttribute('data-category');
+        const isActive = btnCategory.toLowerCase() === activeFilter.toLowerCase() || 
+                         activeFilter.toLowerCase().includes(btnCategory.toLowerCase()) && btnCategory !== 'all';
+
+        if (isActive) {
+            btn.className = "filter-btn text-xs md:text-sm uppercase tracking-[0.15em] border-b border-black text-black pb-1 transition-all duration-300";
+        } else {
+            btn.className = "filter-btn text-xs md:text-sm uppercase tracking-[0.15em] text-gray-400 hover:text-black hover:border-black border-b border-transparent transition-all pb-1";
+        }
+    });
 }
 
 function initMobileMenu() {

@@ -175,7 +175,60 @@
             </p>
         </div>
     </footer>
+    <div id="lightbox" class="fixed inset-0 z-[60] hidden opacity-0 transition-opacity duration-300" aria-modal="true">
 
+        <div class="absolute inset-0 bg-gray-100"></div>
+
+        <button onclick="closeCarousel()" class="absolute top-6 right-6 z-50 p-4 group">
+            <span
+                class="text-[10px] uppercase tracking-widest text-gray-400 group-hover:text-black mr-2 align-middle transition-colors">Close</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor"
+                class="w-6 h-6 inline-block text-black transition-transform duration-300 group-hover:rotate-90">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+
+        <div class="absolute top-8 left-8 z-50">
+            <p id="lightbox-counter" class="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-black">
+                00 / 00
+            </p>
+        </div>
+
+        <div
+            class="relative h-full w-full flex flex-col items-center justify-center py-16 px-4 md:px-20 pointer-events-none">
+
+            <button onclick="prevImage()"
+                class="pointer-events-auto absolute left-4 md:left-8 z-50 p-2 hover:bg-gray-200/50 rounded-full transition-colors hidden md:block group">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1"
+                    stroke="currentColor" class="w-8 h-8 text-gray-400 group-hover:text-black transition-colors">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+            </button>
+            <button onclick="nextImage()"
+                class="pointer-events-auto absolute right-4 md:right-8 z-50 p-2 hover:bg-gray-200/50 rounded-full transition-colors hidden md:block group">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1"
+                    stroke="currentColor" class="w-8 h-8 text-gray-400 group-hover:text-black transition-colors">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+            </button>
+
+            <figure class="relative flex flex-col items-center justify-center max-h-full max-w-full flex-1">
+                <img id="lightbox-img" src="" alt="Detail"
+                    class="max-h-[calc(100vh-180px)] w-auto object-contain shadow-sm opacity-0 transition-all duration-500 scale-[0.98]"
+                    onload="this.classList.remove('opacity-0', 'scale-[0.98]'); this.classList.add('scale-100')">
+
+                <figcaption class="mt-6 pointer-events-auto">
+                    <p id="lightbox-caption"
+                        class="text-[9px] uppercase tracking-[0.3em] text-gray-400 font-bold text-center">
+                    </p>
+                </figcaption>
+            </figure>
+
+        </div>
+
+        <div onclick="closeCarousel()" class="absolute inset-0 z-0"></div>
+    </div>
     <script src="src/main.js"></script>
 </body>
 
