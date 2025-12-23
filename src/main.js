@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // DATOS DE EMAILJS (¡REEMPLAZA ESTO!)
             const serviceID = 'service_sg91wkp';  // Ej: 'service_x8s9...'
-            const templateID = 'template_tb4rbzq'; // Ej: 'template_9a2...'
+            const templateID = 'template_0cawmq8'; // Ej: 'template_9a2...'
 
             emailjs.sendForm(serviceID, templateID, this)
                 .then(() => {
