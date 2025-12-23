@@ -1,13 +1,26 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Me | Miranda's Archive</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="src/style.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;600&family=Playfair+Display:ital@0;1&display=swap" rel="stylesheet">
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() {
+            // AQUÍ PEGAS TU PUBLIC KEY DE EMAILJS
+            emailjs.init("TU_PUBLIC_KEY_AQUI"); 
+        })();
+    </script>
 </head>
-<body class="bg-white text-brand-dark font-sans antialiased">
+
+<body class="bg-white text-brand-dark font-sans antialiased selection:bg-black selection:text-white">
 
     <header class="fixed w-full top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
@@ -20,7 +33,7 @@
                     <li><a href="about.html" class="text-black border-b border-black pb-1">ABOUT ME</a></li>
                 </ul>
             </nav>
-            <button id="mobile-menu-btn" class="md:hidden p-2 uppercase text-xs tracking-widest">MENU</button>
+            <button id="mobile-menu-btn" class="md:hidden p-2 uppercase text-xs tracking-widest hover:bg-gray-100 rounded">MENU</button>
         </div>
         <div id="mobile-menu" class="hidden bg-white absolute w-full border-b border-gray-100 px-6 py-8 md:hidden flex flex-col gap-4 text-center">
             <a href="index.html" class="text-sm uppercase tracking-widest text-gray-500">Portfolio</a>
@@ -28,54 +41,127 @@
         </div>
     </header>
 
-    <main class="pt-40 pb-20 px-6 max-w-3xl mx-auto min-h-screen animate-entry">
-        
-        <h1 class="text-3xl md:text-4xl font-light mb-12 tracking-wide">About me</h1>
+    <main class="pt-40 pb-20 px-6 max-w-7xl mx-auto min-h-screen animate-fade-in-up">
 
-        <div class="text-sm md:text-base leading-loose font-light text-gray-600 space-y-6 text-justify">
-            <p>
-                Hi! I’m Miranda Piñeiro, a marketing and publicity technician with a passion for photography and social media.
-            </p>
-            <p>
-                On this website, you’ll find a selection of my work, alongside content I share more frequently on my Instagram: 
-                <a href="https://instagram.com/mirandaasarchive" target="_blank" class="text-black hover:underline">@mirandaasarchive</a>
-            </p>
-            <p>
-                If you’re interested in collaborating or have any questions, feel free to reach out — you’ll find my contact information below.
-            </p>
-            <p>
-                Thanks for visiting!
-            </p>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-12 mb-32">
+            
+            <div class="md:col-span-4">
+                <h1 class="text-4xl md:text-6xl font-light uppercase tracking-tighter leading-none mb-6">
+                    Profile<br>& Contact
+                </h1>
+                <div class="w-12 h-px bg-black mb-6"></div>
+                <p class="text-xs font-bold uppercase tracking-widest text-gray-400">
+                    Marketing & Publicity Technician
+                </p>
+            </div>
+
+            <div class="md:col-span-8 md:pl-10 space-y-8">
+                <p class="text-lg md:text-xl font-serif italic text-gray-800 leading-relaxed max-w-2xl">
+                    "I capture spaces where light and narrative meet. My work is an ongoing exploration of gastronomy, interior design, and the subtle details that define an atmosphere."
+                </p>
+                <div class="text-sm leading-loose font-light text-gray-500 space-y-6 text-justify max-w-xl">
+                    <p>
+                        Hi, I’m Miranda Piñeiro. Based in Galicia, I blend technical marketing expertise with a curated visual eye. This archive serves as a selection of my professional work and personal explorations.
+                    </p>
+                    <p>
+                        Beyond this portfolio, I curate a daily visual diary on Instagram. If you represent a brand, studio, or agency looking for a distinct visual language, I would love to hear from you.
+                    </p>
+                    <a href="https://instagram.com/mirandaasarchive" target="_blank" class="inline-block border-b border-gray-300 hover:border-black pb-0.5 text-black uppercase tracking-widest text-xs transition-all mt-4">
+                        @mirandaasarchive ↗
+                    </a>
+                </div>
+            </div>
         </div>
 
-        <hr class="my-16 border-gray-100">
+        <div class="max-w-3xl mx-auto mt-20">
+            <div class="text-center mb-16">
+                <h2 class="text-xs uppercase tracking-[0.3em] font-bold text-gray-900 mb-4">Get in Touch</h2>
+                <p class="text-gray-400 font-serif italic text-lg">For inquiries, collaborations, or just to say hello.</p>
+            </div>
 
-        <div class="max-w-xl">
-            <h2 class="text-xl font-light mb-8 tracking-wide">Contact me!</h2>
-            
-            <form action="#" class="space-y-8">
-                <div>
-                    <label class="block text-xs uppercase tracking-widest font-bold mb-2">Name</label>
-                    <input type="text" class="w-full border border-gray-300 p-3 text-sm focus:outline-none focus:border-black transition-colors bg-gray-50">
+            <form id="contact-form" class="space-y-12">
+                <div class="group relative">
+                    <input type="text" name="user_name" required
+                        class="peer w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:outline-none focus:border-black transition-colors placeholder-transparent text-gray-900"
+                        placeholder="Name">
+                    <label class="absolute left-0 -top-3.5 text-xs text-gray-400 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-black uppercase tracking-widest">
+                        Name / Company
+                    </label>
                 </div>
 
-                <div>
-                    <label class="block text-xs uppercase tracking-widest font-bold mb-2">Email (required)</label>
-                    <input type="email" required class="w-full border border-gray-300 p-3 text-sm focus:outline-none focus:border-black transition-colors bg-gray-50">
+                <div class="group relative">
+                    <input type="email" name="user_email" required
+                        class="peer w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:outline-none focus:border-black transition-colors placeholder-transparent text-gray-900"
+                        placeholder="Email">
+                    <label class="absolute left-0 -top-3.5 text-xs text-gray-400 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-black uppercase tracking-widest">
+                        Email Address
+                    </label>
                 </div>
 
-                <div>
-                    <label class="block text-xs uppercase tracking-widest font-bold mb-2">Message</label>
-                    <textarea rows="4" class="w-full border border-gray-300 p-3 text-sm focus:outline-none focus:border-black transition-colors bg-gray-50"></textarea>
+                <div class="group relative">
+                    <textarea name="message" rows="4" required
+                        class="peer w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:outline-none focus:border-black transition-colors placeholder-transparent resize-none text-gray-900"
+                        placeholder="Message"></textarea>
+                    <label class="absolute left-0 -top-3.5 text-xs text-gray-400 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-black uppercase tracking-widest">
+                        Your Message
+                    </label>
                 </div>
 
-                <button type="button" class="bg-black text-white px-8 py-3 text-xs uppercase tracking-widest hover:bg-gray-800 transition-colors">
-                    Enviar
-                </button>
+                <div class="flex flex-col items-center gap-6 mt-8">
+                    <button type="submit" id="submit-btn"
+                        class="bg-black text-white px-10 py-4 text-[10px] uppercase tracking-[0.25em] hover:bg-white hover:text-black border border-black transition-all duration-300 w-full md:w-auto">
+                        Send Message
+                    </button>
+                    
+                    <p id="form-status" class="text-xs text-gray-500 uppercase tracking-widest hidden animate-pulse">
+                        Sending...
+                    </p>
+                </div>
             </form>
         </div>
 
     </main>
+
+    <footer class="bg-white pt-32 pb-16 border-t border-gray-100 mt-32">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 text-xs">
+                <div class="flex flex-col space-y-6 md:col-span-1">
+                    <p class="font-bold text-black tracking-[0.2em] uppercase text-[10px]">Miranda Piñeiro Silva</p>
+                    <div class="flex flex-col space-y-1 text-gray-400 text-[10px] tracking-widest uppercase">
+                        <span>© 2025 Archive</span>
+                        <span>All Rights Reserved</span>
+                    </div>
+                </div>
+                <div class="hidden md:block md:col-span-1"></div>
+                <div class="flex flex-col space-y-8 md:col-span-1">
+                    <div class="flex flex-col space-y-2">
+                        <p class="uppercase tracking-[0.2em] text-black text-[10px] font-bold mb-2">Location</p>
+                        <div class="text-gray-500 uppercase tracking-wide leading-relaxed text-[11px]">
+                            <p>Narón, A Coruña</p>
+                            <p>15570, Galicia</p>
+                            <p>España</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <p class="uppercase tracking-[0.2em] text-black text-[10px] font-bold mb-2">Contact</p>
+                        <a href="mailto:mirandapineiro05@gmail.com" class="text-gray-500 hover:text-black hover:underline decoration-1 underline-offset-4 transition-all duration-300 uppercase tracking-wide text-[11px]">
+                            mirandapineiro05@gmail.com
+                        </a>
+                        <p class="text-gray-500 uppercase tracking-wide text-[11px]">+34 641 171 122</p>
+                    </div>
+                </div>
+                <div class="flex flex-col space-y-4 md:col-span-1">
+                    <p class="uppercase tracking-[0.2em] text-black text-[10px] font-bold mb-4">Connect</p>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="group flex items-center justify-between w-full md:w-auto text-gray-500 hover:text-black transition-colors duration-300"><span class="uppercase tracking-widest text-[11px] group-hover:underline decoration-1 underline-offset-4">Instagram</span><span class="opacity-0 group-hover:opacity-100 text-[10px] transition-opacity duration-300 ml-2">↗</span></a></li>
+                        <li><a href="#" class="group flex items-center justify-between w-full md:w-auto text-gray-500 hover:text-black transition-colors duration-300"><span class="uppercase tracking-widest text-[11px] group-hover:underline decoration-1 underline-offset-4">LinkedIn</span><span class="opacity-0 group-hover:opacity-100 text-[10px] transition-opacity duration-300 ml-2">↗</span></a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="w-full h-px bg-gray-100 mt-16 mb-6"></div>
+            <p class="text-center md:text-left text-[9px] text-gray-300 uppercase tracking-[0.3em]">Designed by Miranda's Archive</p>
+        </div>
+    </footer>
 
     <script src="src/main.js"></script>
 </body>

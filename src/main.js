@@ -276,3 +276,55 @@ function initMobileMenu() {
     const menu = document.getElementById('mobile-menu');
     if(btn && menu) btn.addEventListener('click', () => menu.classList.toggle('hidden'));
 }
+
+// 6. LÓGICA DEL FORMULARIO DE CONTACTO
+document.addEventListener('DOMContentLoaded', () => {
+    // Intentamos buscar el formulario
+    const contactForm = document.getElementById('contact-form');
+
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Evita que la página se recargue
+
+            const btn = document.getElementById('submit-btn');
+            const status = document.getElementById('form-status');
+            const originalBtnText = btn.innerText;
+
+            // Estado de "Enviando..."
+            btn.innerText = 'SENDING...';
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            status.innerText = 'Connecting to server...';
+            status.classList.remove('hidden');
+            status.classList.add('text-gray-500');
+
+            // DATOS DE EMAILJS (¡REEMPLAZA ESTO!)
+            const serviceID = 'TU_SERVICE_ID';  // Ej: 'service_x8s9...'
+            const templateID = 'TU_TEMPLATE_ID'; // Ej: 'template_9a2...'
+
+            emailjs.sendForm(serviceID, templateID, this)
+                .then(() => {
+                    // ÉXITO
+                    btn.innerText = 'MESSAGE SENT';
+                    status.innerText = 'Thank you. I will reply shortly.';
+                    status.classList.remove('text-gray-500');
+                    status.classList.add('text-black', 'font-bold');
+                    
+                    contactForm.reset(); // Limpiar campos
+
+                    setTimeout(() => {
+                        btn.innerText = originalBtnText;
+                        btn.disabled = false;
+                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }, 5000);
+                }, (err) => {
+                    // ERROR
+                    btn.innerText = 'ERROR';
+                    btn.disabled = false;
+                    status.innerText = 'Error sending message. Please try again.';
+                    status.classList.add('text-red-500');
+                    console.error('EmailJS Error:', err);
+                });
+        });
+    }
+});
