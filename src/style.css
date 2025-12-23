@@ -1,0 +1,42 @@
+/* style.css */
+
+/* 1. Importamos fuentes elegantes (Google Fonts) */
+/* Epilogue para cuerpo y una Serif moderna para títulos */
+@import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@200;400;600&family=Playfair+Display:ital@0;1&display=swap');
+
+/* 2. Configuraciones base */
+body {
+    /* Evita saltos raros al cargar */
+    -webkit-font-smoothing: antialiased; 
+}
+
+/* 3. Animaciones Personalizadas (Marca de la casa) */
+@keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-entry {
+    animation: fadeSlideUp 0.8s ease-out forwards;
+    opacity: 0; /* Comienza invisible */
+}
+
+/* Loader giratorio */
+.loader {
+    border-top-color: #1a1a1a;
+    animation: spinner 1.5s linear infinite;
+}
+
+@keyframes spinner {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Utilidad para ocultar scrollbar en galerías horizontales si las usas */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
