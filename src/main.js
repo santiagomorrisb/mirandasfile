@@ -74,24 +74,31 @@ async function initPortfolio() {
 }
 
 // 4. Renderizador Mágico Mejorado
+// 4. Renderizador Mágico (Actualizado con Lógica de "Zara")
 window.renderPortfolio = (filter) => {
     const grid = document.getElementById('portfolio-grid');
     
-    // NUEVO: Actualizar el estado visual del menú
-    updateMenuState(filter);
+    updateMenuState(filter); // Mantenemos la función del menú activo
 
     grid.innerHTML = ''; 
 
     let itemsToShow = [];
 
     if (filter === 'all') {
-        itemsToShow = allPostsData.map(post => ({
-            type: 'cover',
-            title: post.title.rendered, // "Gastronomy", "Exterior", etc.
-            image: getFeaturedImage(post),
-            link: post.link
-        }));
+        // MODO PORTADA:
+        // Intentamos sacar imagen destacada O la primera imagen del contenido
+        itemsToShow = allPostsData.map(post => {
+            const coverImage = getSmartCoverImage(post); // Usamos la nueva función inteligente
+            return {
+                type: 'cover',
+                title: post.title.rendered,
+                image: coverImage,
+                link: post.link,
+                hasImage: coverImage !== null // Bandera para saber si tenemos foto
+            };
+        });
     } else {
+        // MODO GALERÍA (Igual que antes)
         const targetPost = allPostsData.find(p => 
             p.title.rendered.toLowerCase().includes(filter.toLowerCase())
         );
@@ -100,55 +107,60 @@ window.renderPortfolio = (filter) => {
             const galleryImages = extractGalleryImages(targetPost.content.rendered);
             itemsToShow = galleryImages.map(imgSrc => ({
                 type: 'photo',
-                title: filter + ' Collection',
+                title: filter,
                 image: imgSrc,
-                link: targetPost.link
+                link: targetPost.link,
+                hasImage: true
             }));
         }
     }
 
     if (itemsToShow.length === 0) {
-        grid.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center py-20 opacity-50">
-            <span class="text-4xl mb-4">☹</span>
-            <p class="uppercase text-xs tracking-widest">No content found for ${filter}</p>
-        </div>`;
+        grid.innerHTML = `<div class="col-span-full py-20 text-center opacity-40 text-xs tracking-widest uppercase">No content available</div>`;
         return;
     }
 
-    // Generar Tarjetas con Estrategia de Carga
+    // Renderizado de Tarjetas (Estilo Zara: Imagen grande, texto mínimo)
     itemsToShow.forEach((item, index) => {
-        const card = document.createElement('article');
-        // Animación stagger (en cascada)
-        card.className = `group cursor-pointer opacity-0 animate-fade-in-up`;
-        card.style.animationDelay = `${index * 100}ms`; // Retardo progresivo
+        
+        // Si no hay imagen en "All Work", saltamos este elemento para no romper la estética
+        // Opcional: podrías mostrar una tarjeta solo texto, pero en Zara si no hay foto, no suele haber item.
+        if (item.type === 'cover' && !item.hasImage) return;
 
-        // HTML INTERNO: Skeleton Loader + Imagen con Fade-in
+        const card = document.createElement('article');
+        card.className = `group cursor-pointer opacity-0 animate-fade-in-up flex flex-col gap-3`;
+        card.style.animationDelay = `${index * 100}ms`;
+
+        // HTML INTERNO
+        // Eliminé bordes y sombras para hacerlo más plano (flat) y limpio
         card.innerHTML = `
-            <div class="relative w-full aspect-[3/4] overflow-hidden bg-gray-100 mb-5">
+            <div class="relative w-full aspect-[3/4] overflow-hidden bg-gray-100">
                 
-                <div class="absolute inset-0 bg-gray-200 animate-pulse z-10 skeleton-layer"></div>
+                <div class="absolute inset-0 bg-gray-200 animate-pulse z-10"></div>
 
                 <img 
                     src="${item.image}" 
                     alt="${item.title}" 
-                    class="w-full h-full object-cover transition-all duration-700 opacity-0 transform scale-105 group-hover:scale-100 filter grayscale group-hover:grayscale-0"
+                    class="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105 opacity-0"
                     onload="this.classList.remove('opacity-0'); this.previousElementSibling.style.display='none';"
-                    onerror="this.style.display='none'; this.previousElementSibling.classList.remove('animate-pulse'); this.previousElementSibling.innerHTML='<span class=\'flex h-full items-center justify-center text-gray-300 text-xs uppercase\'>Image N/A</span>';"
+                    onerror="this.style.display='none';"
                 >
+                
+                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 pointer-events-none"></div>
             </div>
             
-            <div class="flex justify-between items-end border-b border-transparent group-hover:border-black pb-2 transition-colors duration-300">
-                <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-gray-900">
+            <div class="flex flex-col items-start pt-1">
+                <h3 class="text-xs md:text-sm font-bold uppercase tracking-[0.15em] text-black group-hover:text-gray-600 transition-colors">
                     ${item.title}
                 </h3>
-                ${item.type === 'cover' ? '<span class="text-xs text-gray-400 group-hover:text-black transition-colors">Ver Colección ↗</span>' : ''}
+                ${item.type === 'cover' ? 
+                    `<span class="text-[10px] uppercase tracking-widest text-gray-400 mt-1">View Collection</span>` 
+                    : ''}
             </div>
         `;
         
         card.addEventListener('click', () => {
             if(item.type === 'cover') {
-                // Al hacer click en la portada, navegamos a esa categoría
-                // IMPORTANTE: Usamos el título del post (ej: "Gastronomy")
                 window.renderPortfolio(item.title); 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
@@ -159,6 +171,26 @@ window.renderPortfolio = (filter) => {
         grid.appendChild(card);
     });
 };
+
+// --- NUEVA FUNCIÓN DE IMAGEN INTELIGENTE ---
+function getSmartCoverImage(post) {
+    // 1. Intentar sacar la imagen destacada oficial de WP
+    if (post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'][0]) {
+        return post._embedded['wp:featuredmedia'][0].source_url;
+    }
+    
+    // 2. FALLBACK: Si no hay destacada, buscar la primera imagen dentro del contenido del post
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = post.content.rendered;
+    const firstImage = tempDiv.querySelector('img');
+    
+    if (firstImage) {
+        return firstImage.src;
+    }
+
+    // 3. Si no hay NADA, devolvemos null (para filtrar el item y que no salga roto)
+    return null;
+}
 
 // 5. NUEVO: Función para actualizar botones del menú
 function updateMenuState(activeFilter) {
