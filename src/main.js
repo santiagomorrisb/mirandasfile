@@ -298,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
             status.classList.remove('hidden');
             status.classList.add('text-gray-500');
 
-            // DATOS DE EMAILJS (¡REEMPLAZA ESTO!)
+            // DApi conexión con EmailJS
             const serviceID = 'service_sg91wkp';  // Ej: 'service_x8s9...'
             const templateID = 'template_0cawmq8'; // Ej: 'template_9a2...'
 
